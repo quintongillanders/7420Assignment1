@@ -1,0 +1,34 @@
+{%  extends "reservations/base.html" %}
+
+{% block title %}Make Reservation{% endblock %}
+
+{% block content %}
+<h1>My Reservations</h1>
+
+{% if reservations %}
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+    <tr>
+        <th>Room</th>
+        <th>Date</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Created At</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for reservation in reservations %}
+    <tr>
+        <td>{{ reservation.room.name }}</td>
+        <td>{{ reservation.date }}</td>
+        <td>{{ reservation.start_time }}</td>
+        <td>{{ reservation.end_time }}</td>
+        <td>{{ reservation.created_at }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <p>No reservations found</p>
+{% endif %}
+{% endblock %}

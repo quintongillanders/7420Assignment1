@@ -1,0 +1,30 @@
+{% extends "reservations/base.html" %}
+
+{% block title %}Available Rooms{% endblock %}
+
+{%  block content %}
+<h1>Available Rooms</h1>
+
+{% if rooms %}
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Location</th>
+        <th>Capacity</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for room in rooms %}
+    <tr>
+        <td>{{ room.name }}</td>
+        <td>{{ room.location }}</td>
+        <td>{{ room.capacity }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No rooms available, please try again later or on a later date</p>
+{% endif %}
+{% endblock %}
