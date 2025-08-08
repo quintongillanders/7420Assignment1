@@ -3,25 +3,119 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
+from django.utils import timezone
+from datetime import datetime, time
 from .forms import CustomUserCreationForm, ConferenceRoomForm, ReservationForm
 from .models import ConferenceRoom, Reservation
 
+
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('Username')
+        password = request.POST.get('Password')
+
+        # if username or password fields are empty
+        if not username or not password:
+            messages.error(request, 'Please enter both username and password and try again.')
+            return render(request, 'registration/login.html')
+
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('room_list') # sends the user back to the main page
+        else:
+            messages.error(request, 'Incorrect username or password. Please try again.')
+
+            return render(request, 'registration/login.html')
+
 @login_required
 def room_list(request):
+    # Get the date from the request, or use today's date
+    date_str = request.GET.get('date')
+    if date_str:
+        try:
+            selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            selected_date = timezone.now().date()
+    else:
+        selected_date = timezone.now().date()
+    
+    # get the current time for availability
+    current_time = timezone.now().time()
+    
+    # get all rooms
     rooms = ConferenceRoom.objects.all()
-    return render(request, 'reservations/room_list.html', {'rooms': rooms})
+    
+    # find all reservations for that specific date
+    reservations = Reservation.objects.filter(date=selected_date)
+    
+    # check for availability on rooms for that specific date
+    for room in rooms:
+        # Get all reservations for this room on the selected date
+        room_reservations = reservations.filter(room=room).order_by('start_time')
+        room.is_available = not room_reservations.exists()
+        
+        # store the time slots of rooms
+        room.booking_times = []
+        for res in room_reservations:
+            room.booking_times.append({
+                'start': res.start_time.strftime('%I:%M %p').lstrip('0'),
+                'end': res.end_time.strftime('%I:%M %p').lstrip('0')
+            })
+    
+    context = {
+        'rooms': rooms,
+        'selected_date': selected_date,
+        'date_str': selected_date.strftime('%Y-%m-%d')  # Format for the date input
+    }
+    return render(request, 'reservations/room_list.html', context)
+
 
 @login_required
 def make_reservation(request):
+    # Get room_id and date from query parameters if they exist
+    room_id = request.GET.get('room')
+    date_str = request.GET.get('date')
+    
     if request.method == 'POST':
         form = ReservationForm(request.POST)
         if form.is_valid():
             reservation = form.save(commit=False)
             reservation.user = request.user
-            reservation.save()
-            return redirect('my_reservations')
+            
+            # Check for overlapping reservations
+            overlapping = Reservation.objects.filter(
+                room=reservation.room,
+                date=reservation.date,
+                start_time__lt=reservation.end_time,
+                end_time__gt=reservation.start_time
+            ).exists()
+            
+            if overlapping:
+                messages.error(request, 'This room is already booked for the selected time slot. Please choose a different time or room.')
+            else:
+                reservation.save()
+                messages.success(request, 'Reservation created successfully!')
+                return redirect('my_reservations')
     else:
-        form = ReservationForm()
+        # Pre-fill the form with room and date if they're provided in the URL
+        initial_data = {}
+        if room_id:
+            try:
+                initial_data['room'] = ConferenceRoom.objects.get(id=room_id)
+            except ConferenceRoom.DoesNotExist:
+                pass
+                
+        if date_str:
+            try:
+                initial_data['date'] = datetime.strptime(date_str, '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                pass
+                
+        form = ReservationForm(initial=initial_data)
+    
     return render(request, 'reservations/make_reservation.html', {'form': form})
 
 @login_required
@@ -29,7 +123,7 @@ def my_reservations(request):
     reservations = Reservation.objects.filter(user=request.user)
     return render(request, 'reservations/my_reservations.html', {'reservations': reservations}) 
 
-@login_required
+@staff_member_required
 def add_room(request):
     if request.method == 'POST':
         form = ConferenceRoomForm(request.POST)

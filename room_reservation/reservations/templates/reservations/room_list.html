@@ -2,29 +2,82 @@
 
 {% block title %}Available Rooms{% endblock %}
 
-{%  block content %}
-<h1>Available Rooms</h1>
+{% block content %}
+<div class="container">
+    <h1>Available Rooms</h1>
+    
+    <!-- Date Picker Form -->
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="date">Check availability for date:</label>
+                    <div class="input-group">
+                        <input type="date" 
+                               class="form-control" 
+                               id="date" 
+                               name="date" 
+                               value="{{ date_str }}"
+                               min="{{ timezone.now|date:'Y-m-d' }}">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-primary">Check</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 
-{% if rooms %}
-<table border="1" cellpadding="8" cellspacing="0">
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Location</th>
-        <th>Capacity</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for room in rooms %}
-    <tr>
-        <td>{{ room.name }}</td>
-        <td>{{ room.location }}</td>
-        <td>{{ room.capacity }}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>No rooms available, please try again later or on a later date</p>
-{% endif %}
+    {% if rooms %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Capacity</th>
+                    <th>Status for {{ selected_date|date:"F j, Y" }}</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for room in rooms %}
+                <tr>
+                    <td>{{ room.name }}</td>
+                    <td>{{ room.location }}</td>
+                    <td>{{ room.capacity }}</td>
+                    <td>
+                        {% if room.is_available %}
+                        <span style="color:green; font-weight: bold;">Available all day</span>
+                        {% else %}
+                        <div>
+                            <div style="color:red; font-weight: bold; margin-bottom: 5px; text-align: center;">Booked for:</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+                                {% for slot in room.booking_times %}
+                                <span style="background-color: #f8d7da; color: #721c24; padding: 3px 8px; border-radius: 4px; font-size: 0.9em;">
+                                    {{ slot.start }} - {{ slot.end }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'make_reservation' %}?room={{ room.id }}&date={{ selected_date|date:'Y-m-d' }}" 
+                           class="btn btn-sm btn-primary"
+                           {% if not room.is_available %}disabled{% endif %}>
+                            Book Now
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        No rooms available, please try again later or on a different date.
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
