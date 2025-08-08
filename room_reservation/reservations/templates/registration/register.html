@@ -1,0 +1,107 @@
+{% extends "reservations/base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<h1>Register</h1>
+
+<div class="card">
+    <form method="post" autocomplete="off">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="error">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <table>
+            {% for field in form %}
+            <tr>
+                <td>{{ field.label_tag }}</td>
+                <td>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <div class="helptext">{{ field.help_text|safe }}</div>
+                    {% endif %}
+                    {% if field.errors %}
+                    <div class="error">
+                        {% for error in field.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        
+        <div style="margin-top: 15px;">
+            <button type="submit" class="btn">Register</button>
+            <a href="{% url 'login' %}" style="margin-left: 10px;">Already have an account? Login Here!</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .card {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    table {
+        width: 100%;
+    }
+    
+    td {
+        padding: 8px 0;
+    }
+    
+    .form-control {
+        width: 100%;
+        max-width: 300px;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .btn {
+        background-color: #4CAF50;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .btn:hover {
+        background-color: #45a049;
+    }
+    
+    .helptext {
+        font-size: 0.8em;
+        color: #666;
+        margin-top: 4px;
+        display: block;
+        max-width: 300px;
+    }
+    
+    .error {
+        color: #dc3545;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+    
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 5px 0 0 0;
+        color: #dc3545;
+    }
+</style>
+{% endblock %}

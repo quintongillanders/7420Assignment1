@@ -1,5 +1,6 @@
 from django.urls import path
-from django.contrib.auth.views import LogoutView
+from django.contrib.auth.views import LogoutView, LoginView
+from .forms import CustomLoginForm
 from . import views
 
 urlpatterns = [
@@ -7,6 +8,7 @@ urlpatterns = [
     path('reserve/', views.make_reservation, name='make_reservation'),
     path('my_reservations/', views.my_reservations, name='my_reservations'),
     path('rooms/add/', views.add_room, name='add_room'),
-
+    path('login/', LoginView.as_view(template_name='registration/login.html', authentication_form=CustomLoginForm), name='login'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+    path('register/', views.register, name='register'),
 ]

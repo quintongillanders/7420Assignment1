@@ -5,10 +5,41 @@
 {% block content %}
 <h1>Login</h1>
 
-<form method="post">
+<form method="post" autocomplete="off" novalidate>
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
+    <table>
+        {% for field in form %}
+        <tr>
+            <td>{{ field.label_tag }}</td>
+            <td>
+                <input type="{{ field.field.widget.input_type }}" 
+                       name="{{ field.name }}" 
+                       id="{{ field.id_for_label }}"
+                       {% if field.name == 'username' or field.name == 'password' %}value=""{% endif %}
+                       autocomplete="off">
+                {% if field.help_text %}
+                <small style="color: grey">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                <p style="color: red">{{ error }}</p>
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div style="margin-top: 10px;">
+        <button type="submit">Login</button>
+    </div>
 </form>
-    <p>Don't have an account? Please contact your administrator</p>
+<p>Don't have an account? <a href="{% url 'register' %}">Register Here!</a></p>
+
+<script>
+    window.onload = function() {
+        const username = document.querySelector('input[name="username"]');
+        const password = document.querySelector('input[name="password"]');
+        username.focus();
+        username.value = '';
+        password.value = '';
+    };
+</script>
 {% endblock %}
