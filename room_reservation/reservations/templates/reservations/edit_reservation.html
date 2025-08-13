@@ -1,0 +1,73 @@
+{% extends 'reservations/base.html' %}
+
+{% block title %}Edit Reservation{% endblock %}
+
+{% block content %}
+<h1>Edit Reservation</h1>
+
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+        <table>
+            {{ form.as_table }}
+        </table>
+        <div style="margin-top: 10px;">
+            <button type="submit" 
+                    style="padding: 6px 12px; 
+                           background-color: #f6061d; 
+                           color: white; 
+                           border: none; 
+                           border-radius: 4px; 
+                           cursor: pointer;
+                           font-size: 14px;">
+                Save Changes
+            </button>
+            <a href="{% url 'my_reservations' %}" 
+               style="padding: 6px 12px;
+                      margin-left: 10px;
+                      color: #333;
+                      text-decoration: none;">
+                Back to My Reservations
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-control, .form-select {
+        max-width: 300px;
+    }
+    input[type="date"],
+    input[type="time"] {
+        max-width: 200px;
+    }
+    .card {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    table {
+        width: 100%;
+    }
+    th, td {
+        padding: 8px 0;
+    }
+    th {
+        text-align: left;
+        padding-right: 10px;
+    }
+    .helptext {
+        font-size: 0.8em;
+        color: #666;
+        display: block;
+        margin-top: 5px;
+    }
+    .errorlist {
+        color: #dc3545;
+        font-size: 0.9em;
+        margin: 5px 0 0 0;
+        padding: 0;
+        list-style: none;
+    }
+</style>
+{% endblock %}

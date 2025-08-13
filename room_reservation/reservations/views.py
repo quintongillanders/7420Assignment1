@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.utils import timezone
+from django.db.models import Q
 from datetime import datetime, time
 from .forms import CustomUserCreationForm, ConferenceRoomForm, ReservationForm
 from .models import ConferenceRoom, Reservation
@@ -94,13 +95,13 @@ def make_reservation(request):
             ).exists()
             
             if overlapping:
-                messages.error(request, 'This room is already booked for the selected time slot. Please choose a different time or room.')
+                messages.error(request, 'The time slot for this room has been taken, please select a different time or room.')
             else:
                 reservation.save()
                 messages.success(request, 'Reservation created successfully!')
                 return redirect('my_reservations')
     else:
-        # Pre-fill the form with room and date if they're provided in the URL
+
         initial_data = {}
         if room_id:
             try:
@@ -120,8 +121,21 @@ def make_reservation(request):
 
 @login_required
 def my_reservations(request):
-    reservations = Reservation.objects.filter(user=request.user)
-    return render(request, 'reservations/my_reservations.html', {'reservations': reservations}) 
+    now = timezone.now()  # get the current date and time
+    
+    # Filter reservations for the current user that are in the future only
+    reservations = Reservation.objects.filter(
+        user=request.user,
+        date__gte=now.date()  # Only get reservations from today or later
+    ).filter(
+        # This ensures we don't get past reservations from today
+        Q(date__gt=now.date()) |
+        Q(date=now.date(), end_time__gt=now.time())
+    ).order_by('date', 'start_time')
+
+    return render(request, 'reservations/my_reservations.html', {
+        'reservations': reservations
+    })
 
 @staff_member_required
 def add_room(request):
@@ -146,7 +160,46 @@ def register(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, 'Registration successful! You are now logged in.')
-                return redirect('room_list')  # Redirect to the room list after login
+                return redirect('room_list')
     else:
         form = CustomUserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
+
+@login_required
+def edit_reservation(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id, user=request.user)
+    if request.method == 'POST':
+        form = ReservationForm(request.POST, instance=reservation)
+        if form.is_valid():
+            updated_reservation = form.save(commit=False)
+            
+            # Check for overlapping reservations, excluding the current one being edited
+            overlapping = Reservation.objects.filter(
+                room=updated_reservation.room,
+                date=updated_reservation.date,
+                start_time__lt=updated_reservation.end_time,
+                end_time__gt=updated_reservation.start_time
+            ).exclude(id=reservation_id).exists()
+            
+            if overlapping:
+                messages.error(request, 'This room is already booked for the selected time slot. Please choose a different time or room.')
+            else:
+                updated_reservation.save()
+                messages.success(request, 'Reservation updated successfully!')
+                return redirect('my_reservations')
+    else:
+        form = ReservationForm(instance=reservation)
+
+    return render(request, 'reservations/edit_reservation.html', {
+        'form': form,
+        'reservation': reservation
+    })
+
+@login_required
+def cancel_reservation(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id, user=request.user)
+    if request.method == 'POST':
+        reservation.delete()
+        messages.success(request, 'Reservation canceled successfully!')
+    return redirect('my_reservations')
+
