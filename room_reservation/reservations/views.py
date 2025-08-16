@@ -10,7 +10,7 @@ from .forms import CustomUserCreationForm, ConferenceRoomForm, ReservationForm
 from .models import ConferenceRoom, Reservation
 
 
-
+# Login page
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('Username')
@@ -21,16 +21,19 @@ def login_view(request):
             messages.error(request, 'Please enter both username and password and try again.')
             return render(request, 'registration/login.html')
 
+        # Attempt to log the user in
         user = authenticate(username=username, password=password)
 
         if user is not None:
-            login(request, user)
-            return redirect('room_list') # sends the user back to the main page
+            login(request, user) # Login the user and take them to the main page after login
+            return redirect('room_list') # sends the user back to the login page
         else:
             messages.error(request, 'Incorrect username or password. Please try again.')
 
             return render(request, 'registration/login.html')
 
+
+# Room list page
 @login_required
 def room_list(request):
     # Get the date from the request, or use today's date
@@ -51,10 +54,9 @@ def room_list(request):
     
     # find all reservations for that specific date
     reservations = Reservation.objects.filter(date=selected_date)
-    
-    # check for availability on rooms for that specific date
+
+# Attach availability status to each room
     for room in rooms:
-        # Get all reservations for this room on the selected date
         room_reservations = reservations.filter(room=room).order_by('start_time')
         room.is_available = not room_reservations.exists()
         
@@ -69,14 +71,16 @@ def room_list(request):
     context = {
         'rooms': rooms,
         'selected_date': selected_date,
-        'date_str': selected_date.strftime('%Y-%m-%d')  # Format for the date input
+        'date_str': selected_date.strftime('%d-%m-%Y')  # Date format as DD-MM-YYYY
     }
     return render(request, 'reservations/room_list.html', context)
 
 
+
+# Make a reservation
 @login_required
 def make_reservation(request):
-    # Get room_id and date from query parameters if they exist
+    # Get room_id and date if exists
     room_id = request.GET.get('room')
     date_str = request.GET.get('date')
     
@@ -119,6 +123,8 @@ def make_reservation(request):
     
     return render(request, 'reservations/make_reservation.html', {'form': form})
 
+
+# View the user's reservations
 @login_required
 def my_reservations(request):
     now = timezone.now()  # get the current date and time
@@ -137,6 +143,8 @@ def my_reservations(request):
         'reservations': reservations
     })
 
+
+# Add a new conference room (Staff only access)
 @staff_member_required
 def add_room(request):
     if request.method == 'POST':
@@ -148,6 +156,8 @@ def add_room(request):
         form = ConferenceRoomForm()
     return render(request, 'reservations/add_room.html', {'form': form})
 
+
+# Register a new user
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -165,6 +175,7 @@ def register(request):
         form = CustomUserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
 
+# Edit an existing reservation
 @login_required
 def edit_reservation(request, reservation_id):
     reservation = get_object_or_404(Reservation, id=reservation_id, user=request.user)
@@ -173,7 +184,7 @@ def edit_reservation(request, reservation_id):
         if form.is_valid():
             updated_reservation = form.save(commit=False)
             
-            # Check for overlapping reservations, excluding the current one being edited
+            # Exclude current reservation from overlapping checks
             overlapping = Reservation.objects.filter(
                 room=updated_reservation.room,
                 date=updated_reservation.date,
@@ -195,6 +206,7 @@ def edit_reservation(request, reservation_id):
         'reservation': reservation
     })
 
+# Cancel a reservation
 @login_required
 def cancel_reservation(request, reservation_id):
     reservation = get_object_or_404(Reservation, id=reservation_id, user=request.user)

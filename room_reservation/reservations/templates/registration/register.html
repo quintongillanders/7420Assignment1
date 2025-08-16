@@ -7,7 +7,8 @@
 
 <div class="card">
     <form method="post" autocomplete="off">
-        {% csrf_token %}
+        {% csrf_token %} { # security token # }
+
         {% if form.non_field_errors %}
             <div class="error">
                 {% for error in form.non_field_errors %}
@@ -44,6 +45,8 @@
     </form>
 </div>
 
+
+    { # Page style # }
 <style>
     .card {
         max-width: 600px;

@@ -6,14 +6,18 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .models import ConferenceRoom, Reservation
 
+# Get the active user model
 User = get_user_model()
 
+
+# This whole section is the reservation form
 class ReservationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Set initial time to the next half hour
         now = timezone.now()
         next_half_hour = (now + timezone.timedelta(minutes=30 - now.minute % 30)).replace(second=0, microsecond=0)
+        # Default start time to the next half hour
         self.fields['start_time'].initial = next_half_hour.time()
         self.fields['end_time'].initial = (next_half_hour + timezone.timedelta(hours=1)).time()
         
@@ -39,23 +43,28 @@ class ReservationForm(forms.ModelForm):
             }),
         }
 
+        # conference room form
 class ConferenceRoomForm(forms.ModelForm):
     class Meta:
         model = ConferenceRoom
         fields = ['name', 'location', 'capacity']
         
     def clean_name(self):
+        # Validate that room name is at least 3 characters long
         name = self.cleaned_data.get('name')
         if not name or len(name.strip()) < 3:
-            raise forms.ValidationError('Room name must be at least 3 characters long.')
+            raise forms.ValidationError('Please enter a name with at least 3 characters.')
         return name.strip()
         
     def clean_capacity(self):
+        # Ensure capacity is at least 1
         capacity = self.cleaned_data.get('capacity')
         if capacity is not None and capacity < 1:
-            raise forms.ValidationError('Capacity must be at least 1.')
+            raise forms.ValidationError('Please enter a capacity higher than 0.')
         return capacity
 
+
+# Custom user creation form for creating accounts
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
@@ -63,23 +72,27 @@ class CustomUserCreationForm(UserCreationForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         # Custom help text
         self.fields['username'].help_text = 'Your username can only be a max of 150 characters. Letters, digits and @/./+/-/_ only.'
         self.fields['password1'].help_text = (
-            'Your password must contain at least 8 characters. You cannot have a password that is only numbers. eg: 12345678.'
+            'Your password must be at least 8 characters and cannot be numbers only (e.g. 12345678)'
         )
-        self.fields['password2'].help_text = 'Please enter the same password again to verify'
+        self.fields['password2'].help_text = 'Please enter the same password as above.'
         
-        # Add form-control class to all fields
+      # Add bootstrap form control styling
         for fieldname in ['username', 'password1', 'password2']:
             self.fields[fieldname].widget.attrs.update({'class': 'form-control'})
 
+# Custom login form
 class CustomLoginForm(AuthenticationForm):
+    # Override default error messages for login failure attempts
     error_messages = {
         'invalid_login': 'The username or password you entered is incorrect. Please try again.',
-        'inactive': 'This account is inactive.',
+        'inactive': 'This account is currently inactive.',
     }
-    
+
+    # Username input
     username = forms.CharField(
         widget=forms.TextInput(attrs={
             'autofocus': True,
@@ -90,6 +103,7 @@ class CustomLoginForm(AuthenticationForm):
         }),
         label='Username',
     )
+    # Password input
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'autocomplete': 'off',
@@ -98,11 +112,12 @@ class CustomLoginForm(AuthenticationForm):
             'placeholder': 'Enter your password',
         }),
         label='Password',
-        strip=False,
+        strip=False, # do not strip whitespace
     )
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         # Add form-control class to all fields
         for fieldname in ['username', 'password']:
             self.fields[fieldname].widget.attrs.update({'class': 'form-control'})

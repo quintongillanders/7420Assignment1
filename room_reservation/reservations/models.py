@@ -2,20 +2,22 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class ConferenceRoom(models.Model):
-    name = models.CharField(max_length=100)
-    location = models.CharField(max_length=100)
-    capacity = models.PositiveIntegerField()
+    # These will be the basic details about each meeting room
+    name = models.CharField(max_length=100) # Room name
+    location = models.CharField(max_length=100) # Where the room is located
+    capacity = models.PositiveIntegerField() # How many people can fit in the room
 
     def __str__(self):
-        return f"{self.name} ({self.location}) - Capacity: {self.capacity}"
+        # Show name, location and how many seats
+        return f"{self.name} @ {self.location} - Seats: {self.capacity}"
 
 class Reservation(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    room = models.ForeignKey(ConferenceRoom, on_delete=models.CASCADE)
-    date = models.DateField()
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE) # Shows who booked the room
+    room = models.ForeignKey(ConferenceRoom, on_delete=models.CASCADE) # Which room the user booked
+    date = models.DateField() # What time the reservation is for
+    start_time = models.TimeField() # When the reservation starts
+    end_time = models.TimeField() # When the reservation ends
+    created_at = models.DateTimeField(auto_now_add=True) # When the reservation was made
 
     def __str__(self):
-        return f"{self.room.name} - {self.date} {self.start_time}-{self.end_time}"
+        return f"{self.room.name} - {self.date} {self.start_time}-{self.end_time}" #Show which room, date and time.
