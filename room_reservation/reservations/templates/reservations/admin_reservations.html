@@ -24,10 +24,15 @@
             <td>{{ reservation.start_time|time:"g:i A" }}</td>
             <td>{{ reservation.end_time|time:"g:i A" }}</td>
             <td>
-                <a href="{% url 'admin_cancel_reservation' reservation.id %}"
-                   style ="padding: 4px 8px; background-color: #f44336; color: white; border: none; border-radius: 4px; text-decoration: none;"
+                <form action="{% url 'reservations:admin_cancel_reservation' reservation.id %}"
+                      method="post" style="display: inline;"
+                      onsubmit="return confirm('Are you sure you want to cancel this reservation?');">
+                    {% csrf_token %}
+                    <button type="submit"
+                   style ="padding: 4px 8px; background-color: #f44336; color: white; border: none; border-radius: 4px; text-decoration: none;">
                    Cancel
-                   </a>
+                    </button>
+                </form>
             </td>
         </tr>
         {% endfor %}

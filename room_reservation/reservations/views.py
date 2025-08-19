@@ -284,5 +284,5 @@ def admin_cancel_reservation(request, reservation_id):
     if request.method == 'POST':
         reservation.delete()
         messages.success(request, 'Reservation canceled successfully!')
-    return redirect('reservations:view_all_reservations')
+    return redirect('reservations:admin_reservations')
 
