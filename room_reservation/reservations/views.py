@@ -215,3 +215,35 @@ def cancel_reservation(request, reservation_id):
         messages.success(request, 'Reservation canceled successfully!')
     return redirect('my_reservations')
 
+
+# Edit a room, meant for staff only but for now it is open to all
+@login_required
+def edit_room(request, room_id):
+    room = get_object_or_404(ConferenceRoom, id=room_id)
+
+    if request.method == 'POST':
+        form = ConferenceRoomForm(request.POST, instance=room)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Room updated successfully!')
+            return redirect('room_list')
+
+    else:
+        form = ConferenceRoomForm(instance=room)
+    return render(request, 'reservations/edit_room.html', {
+        'form': form,
+        'room': room
+    })
+
+# Delete a room, meant for staff only but for now it is open to all
+@login_required
+def delete_room(request, room_id):
+    room = get_object_or_404(ConferenceRoom, id=room_id)
+
+    if request.method == 'POST':
+        room.delete()
+        messages.success(request, 'Room deleted successfully!')
+        return redirect('room_list')
+
+    messages.info(request, f'Room "{room.name}" deletion cancelled')
+    return redirect('room_list')

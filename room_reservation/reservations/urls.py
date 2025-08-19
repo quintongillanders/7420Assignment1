@@ -13,4 +13,6 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name='registration/login.html', authentication_form=CustomLoginForm), name='login'), # Page for logging in
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'), # Page for logging out
     path('register/', views.register, name='register'), # Page for registering a new user
+    path('rooms/edit/<int:room_id>/', views.edit_room, name='edit_room'), # Page for editing a room
+    path('rooms/delete/<int:room_id>/', views.delete_room, name='delete_room'), # Page for deleting a room
     ]
