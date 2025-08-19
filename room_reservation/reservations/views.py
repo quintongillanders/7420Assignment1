@@ -11,6 +11,15 @@ from .models import ConferenceRoom, Reservation
 from .forms import AdminReservationForm
 
 
+@staff_member_required
+def view_all_reservations(request):
+    """View all reservations (staff only)"""
+    reservations = Reservation.objects.all().order_by('-date', 'start_time')
+    return render(request, 'reservations/admin_reservations.html', {
+        'reservations': reservations
+    })
+
+
 # Login page
 def login_view(request):
     if request.method == 'POST':
@@ -265,10 +274,15 @@ def admin_make_reservation(request):
 
 # Oversee all reservations and cancel reservations, meant for staff only
 @staff_member_required
+def view_all_reservations(request):
+    reservations = Reservation.objects.all().order_by('-date', 'start_time')
+    return render(request, 'reservations/admin_reservations.html', {'reservations': reservations})
+
+@staff_member_required
 def admin_cancel_reservation(request, reservation_id):
     reservation = get_object_or_404(Reservation, id=reservation_id)
-    reservation.delete()
-    messages.success(request, 'Reservation canceled successfully!')
-    return redirect('reservations:room_list')
-
+    if request.method == 'POST':
+        reservation.delete()
+        messages.success(request, 'Reservation canceled successfully!')
+    return redirect('reservations:view_all_reservations')
 
