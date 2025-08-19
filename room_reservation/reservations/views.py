@@ -153,7 +153,7 @@ def add_room(request):
         form = ConferenceRoomForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('room_list')
+            return redirect('reservations:room_list')
     else:
         form = ConferenceRoomForm()
     return render(request, 'reservations/add_room.html', {'form': form})
@@ -172,7 +172,7 @@ def register(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, 'Registration successful! You are now logged in.')
-                return redirect('room_list')
+                return redirect('reservations:room_list')
     else:
         form = CustomUserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
@@ -199,7 +199,7 @@ def edit_reservation(request, reservation_id):
             else:
                 updated_reservation.save()
                 messages.success(request, 'Reservation updated successfully!')
-                return redirect('my_reservations')
+                return redirect('reservations:my_reservations')
     else:
         form = ReservationForm(instance=reservation)
 
@@ -245,7 +245,7 @@ def delete_room(request, room_id):
     if request.method == 'POST':
         room.delete()
         messages.success(request, 'Room deleted successfully!')
-        return redirect('room_list')
+        return redirect('reservations:room_list')
 
     messages.info(request, f'Room "{room.name}" deletion cancelled')
     return redirect('reservations:room_list')
@@ -257,7 +257,7 @@ def admin_make_reservation(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Reservation created successfully!')
-            return redirect('reservations:room_list')  # Using the namespaced URL name
+            return redirect('reservations:room_list')
     else:
         form = AdminReservationForm()
 
