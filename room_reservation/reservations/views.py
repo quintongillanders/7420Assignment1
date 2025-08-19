@@ -8,6 +8,7 @@ from django.db.models import Q
 from datetime import datetime, time
 from .forms import CustomUserCreationForm, ConferenceRoomForm, ReservationForm
 from .models import ConferenceRoom, Reservation
+from .forms import AdminReservationForm
 
 
 # Login page
@@ -71,7 +72,8 @@ def room_list(request):
     context = {
         'rooms': rooms,
         'selected_date': selected_date,
-        'date_str': selected_date.strftime('%d-%m-%Y')  # Date format as DD-MM-YYYY
+        'date_str': selected_date.strftime('%d-%m-%Y'),  # Date format as DD-MM-YYYY
+        'user': request.user  # Make sure user is available in the template
     }
     return render(request, 'reservations/room_list.html', context)
 
@@ -103,7 +105,7 @@ def make_reservation(request):
             else:
                 reservation.save()
                 messages.success(request, 'Reservation created successfully!')
-                return redirect('my_reservations')
+                return redirect('reservations:my_reservations')
     else:
 
         initial_data = {}
@@ -213,11 +215,11 @@ def cancel_reservation(request, reservation_id):
     if request.method == 'POST':
         reservation.delete()
         messages.success(request, 'Reservation canceled successfully!')
-    return redirect('my_reservations')
+    return redirect('reservations:my_reservations')
 
 
 # Edit a room, meant for staff only but for now it is open to all
-@login_required
+@staff_member_required
 def edit_room(request, room_id):
     room = get_object_or_404(ConferenceRoom, id=room_id)
 
@@ -226,7 +228,7 @@ def edit_room(request, room_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Room updated successfully!')
-            return redirect('room_list')
+            return redirect('reservations:room_list')
 
     else:
         form = ConferenceRoomForm(instance=room)
@@ -235,8 +237,8 @@ def edit_room(request, room_id):
         'room': room
     })
 
-# Delete a room, meant for staff only but for now it is open to all
-@login_required
+# Delete a room, meant for staff only
+@staff_member_required
 def delete_room(request, room_id):
     room = get_object_or_404(ConferenceRoom, id=room_id)
 
@@ -246,4 +248,17 @@ def delete_room(request, room_id):
         return redirect('room_list')
 
     messages.info(request, f'Room "{room.name}" deletion cancelled')
-    return redirect('room_list')
+    return redirect('reservations:room_list')
+
+@staff_member_required
+def admin_make_reservation(request):
+    if request.method == 'POST':
+        form = AdminReservationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Reservation created successfully!')
+            return redirect('reservations:room_list')  # Using the namespaced URL name
+    else:
+        form = AdminReservationForm()
+
+    return render(request, 'reservations/admin_make_reservation.html', {'form': form})

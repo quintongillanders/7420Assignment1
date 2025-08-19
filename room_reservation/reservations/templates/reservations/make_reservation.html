@@ -22,9 +22,30 @@
         <table>
             {{ form.as_table }}
         </table>
-        <div style="margin-top: 10px;">
-            <button type="submit">Make Reservation</button>
-            <a href="{% url 'room_list' %}" style="margin-left: 10px;">Back to Room List</a>
+        <div style="margin-top: 20px;">
+            <button type="submit"
+                    style="padding: 6px 12px;
+                           background-color: #0738f1;
+                           color: #fbfafa;
+                           border: none;
+                           border-radius: 4px;
+                           cursor: pointer;
+                           font-size: 14px;
+                           text-decoration: none;
+                           margin-right: 10px;">
+                Make Reservation
+            </button>
+            <a href="{% url 'room_list' %}" 
+               style="padding: 6px 12px;
+                      background-color: #0738f1;
+                      color: #fbfafa;
+                      border: none;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      font-size: 14px;
+                      text-decoration: none;">
+                Back to Room List
+            </a>
         </div>
     </form>
 </div>
@@ -40,6 +61,17 @@
     .card {
         max-width: 600px;
         margin: 0 auto;
+        padding: 20px;
+    }
+    table {
+        width: 100%;
+    }
+    th, td {
+        padding: 8px 0;
+    }
+    th {
+        text-align: left;
+        padding-right: 10px;
     }
 </style>
 {% endblock %}

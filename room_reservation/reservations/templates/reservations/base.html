@@ -134,10 +134,10 @@
 </head>
 <body>
 <nav>
-    <a href="{% url 'room_list' %}">Rooms</a>
-    <a href="{% url 'my_reservations' %}">My Reservations</a>
-    <a href="{% url 'make_reservation' %}">Make Reservation</a>
-    <a href="{% url 'add_room' %}">Add Room</a>
+    <a href="{% url 'reservations:room_list' %}">Rooms</a>
+    <a href="{% url 'reservations:my_reservations' %}">My Reservations</a>
+    <a href="{% url 'reservations:make_reservation' %}">Make Reservation</a>
+    <a href="{% url 'reservations:add_room' %}">Add Room</a>
 
     {% if user.is_authenticated %}
     <form method="post" action="{% url 'logout' %}">

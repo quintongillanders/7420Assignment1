@@ -9,6 +9,39 @@ from .models import ConferenceRoom, Reservation
 # Get the active user model
 User = get_user_model()
 
+class AdminReservationForm(forms.ModelForm):
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all().order_by('username'),
+        label="Select User",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    room = forms.ModelChoiceField(
+        queryset=ConferenceRoom.objects.all().order_by('name'),
+        label="Select Room",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    date = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control',
+        })
+    )
+    start_time = forms.TimeField(
+        widget=forms.TimeInput(attrs={
+            'type': 'time',
+            'class': 'form-control',
+        })
+    )
+    end_time = forms.TimeField(
+        widget=forms.TimeInput(attrs={
+            'type': 'time',
+            'class': 'form-control',
+        })
+    )
+
+    class Meta:
+        model = Reservation
+        fields = ['user', 'room', 'date', 'start_time', 'end_time']
 
 # This whole section is the reservation form
 class ReservationForm(forms.ModelForm):
@@ -43,7 +76,33 @@ class ReservationForm(forms.ModelForm):
             }),
         }
 
-        # conference room form
+        # Admin reservation form
+class AdminReservationForm(forms.ModelForm):
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=True,
+        label="User"
+    )
+    
+    class Meta:
+        model = Reservation
+        fields = ['user', 'room', 'date', 'start_time', 'end_time']
+        widgets = {
+            'date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control',
+            }),
+            'start_time': forms.TimeInput(attrs={
+                'type': 'time',
+                'class': 'form-control',
+            }),
+            'end_time': forms.TimeInput(attrs={
+                'type': 'time',
+                'class': 'form-control',
+            }),
+        }
+
+# Conference room form
 class ConferenceRoomForm(forms.ModelForm):
     class Meta:
         model = ConferenceRoom
