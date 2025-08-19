@@ -218,7 +218,7 @@ def cancel_reservation(request, reservation_id):
     return redirect('reservations:my_reservations')
 
 
-# Edit a room, meant for staff only but for now it is open to all
+# Edit a room, meant for staff only
 @staff_member_required
 def edit_room(request, room_id):
     room = get_object_or_404(ConferenceRoom, id=room_id)
@@ -262,3 +262,13 @@ def admin_make_reservation(request):
         form = AdminReservationForm()
 
     return render(request, 'reservations/admin_make_reservation.html', {'form': form})
+
+# Oversee all reservations and cancel reservations, meant for staff only
+@staff_member_required
+def admin_cancel_reservation(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+    reservation.delete()
+    messages.success(request, 'Reservation canceled successfully!')
+    return redirect('reservations:room_list')
+
+
