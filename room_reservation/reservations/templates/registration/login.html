@@ -57,7 +57,7 @@
         </button>
     </div>
     <div style="margin-top: 15px;">
-        Forgot password?
+        <a href="{% url 'reservations:password_reset' %}">Forgot Password?</a>
     </div>
 </form>
 <p>Don't have an account? <a href="{% url 'reservations:register' %}">Register Here!</a></p>

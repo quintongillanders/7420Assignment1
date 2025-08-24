@@ -43,7 +43,7 @@
         color: white;
         transform: translateY(-1px);
     }
-
+    
     .btn-check-availability:hover {
         background-color: #218838;
         transform: translateY(-1px);
@@ -69,14 +69,14 @@
     <h1>Available Rooms</h1>
 
 {% if user.is_staff %}
-    <div class ="d-flex gap-2 mb-3">
+    <div class ="d-flex gap-2 mb-3 flex-wrap">
     <a href="{% url 'reservations:admin_make_reservation' %}"
-       class="btn btn-primary mb-3 me-4">
-        Reserve for a User
+       class="btn-custom btn-primary-custom">
+        <i class="fas fa-user-plus"></i>Reserve for a User
     </a>
     <a href="{% url 'reservations:admin_reservations' %}"
-       class="btn btn-primary mb-3">
-        View All Reservations
+       class="btn-custom btn-primary-custom">
+        <i class="fas fa-calendar-alt"></i> All Reservations
     </a>
     </div>
 {% endif %}
