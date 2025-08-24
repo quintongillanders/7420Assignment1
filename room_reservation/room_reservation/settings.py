@@ -125,4 +125,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For development only
+# For production, use these settings instead:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.your-email-provider.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'your-email@example.com'
+# EMAIL_HOST_PASSWORD = 'your-email-password'
+
+# Use console backend for development to see the reset link in the console
+# The email will be printed to the console instead of being sent
+# This is useful for testing the password reset flow
+
+# Make sure these point to your actual password reset URLs
+PASSWORD_RESET_CONFIRM = 'password_reset_confirm'
+PASSWORD_RESET_COMPLETE = 'password_reset_complete'
