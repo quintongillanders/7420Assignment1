@@ -160,14 +160,37 @@ def my_reservations(request):
 # Add a new conference room (Staff only access)
 @staff_member_required
 def add_room(request):
-    if request.method == 'POST':
-        form = ConferenceRoomForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('reservations:room_list')
+  # Get current room count
+  current_room_count = ConferenceRoom.objects.count()
+
+  # Check room limit in both GET and POST requests
+  if current_room_count >= 10:
+    messages.error(request, "Maximum limit of 10 rooms reached. Cannot add more rooms.")
+    return redirect('reservations:room_list')
+
+  if request.method == 'POST':
+    form = ConferenceRoomForm(request.POST)
+    if form.is_valid():
+      # Double-check room limit before saving (in case of race condition)
+      if ConferenceRoom.objects.count() >= 10:
+        messages.error(request, "Room limit reached while processing your request. Please try again.")
+        return redirect('reservations:room_list')
+
+      form.save()
+      messages.success(request, "Room added successfully!")
+      return redirect('reservations:room_list')
     else:
-        form = ConferenceRoomForm()
-    return render(request, 'reservations/add_room.html', {'form': form})
+      messages.error(request, "Failed to add room. Please check the form data.")
+  else:
+    form = ConferenceRoomForm()
+
+  context = {
+    'form': form,
+    'rooms_count': current_room_count,
+    'max_rooms': 10
+  }
+
+  return render(request, 'reservations/add_room.html', context)
 
 
 # Register a new user
