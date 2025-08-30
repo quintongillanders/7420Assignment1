@@ -11,6 +11,7 @@ from datetime import datetime, time
 from .forms import CustomUserCreationForm, ConferenceRoomForm, ReservationForm
 from .models import ConferenceRoom, Reservation
 from .forms import AdminReservationForm
+from django.contrib.auth.models import User
 
 
 @staff_member_required
@@ -310,4 +311,9 @@ def admin_cancel_reservation(request, reservation_id):
         reservation.delete()
         messages.success(request, 'Reservation canceled successfully!')
     return redirect('reservations:admin_reservations')
+
+@staff_member_required
+def user_list(request):
+    users = User.objects.all()
+    return render(request, 'reservations/user_list.html', {'users': users})
 

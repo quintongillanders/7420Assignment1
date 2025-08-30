@@ -1,0 +1,35 @@
+{ % extends "reservations/base.html" %}
+{ % block title %}Manage Users{ % endblock %}
+
+{ % block content %}
+<div class="container">
+    <h1>All Users</h1>
+
+    { % if users %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Staff Status</th>
+                    <th>Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.is_staff|yesno:"Yes,No" }}</td>
+                    <td>{{ user.is_active|yesno:"Yes,No" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    { % else %}
+<div class="alert alert-info">No users found</div>
+    { % endif %}
+</div>
+{ % endblock %}
