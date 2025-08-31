@@ -18,6 +18,7 @@ class Reservation(models.Model):
     start_time = models.TimeField() # When the reservation starts
     end_time = models.TimeField() # When the reservation ends
     created_at = models.DateTimeField(auto_now_add=True) # When the reservation was made
+    reminder_sent = models.BooleanField(default=False) # Track if reminder email was sent
 
     def __str__(self):
         return f"{self.room.name} - {self.date} {self.start_time}-{self.end_time}" #Show which room, date and time.
