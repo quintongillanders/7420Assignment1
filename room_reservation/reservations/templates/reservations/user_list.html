@@ -79,10 +79,10 @@
                     <td>{{ user.is_active|yesno:"Active,Inactive" }}</td>
                     <td>
                 <div class="btn-group-custom">
-                    <a href="#" class="btn btn-custom btn-edit-custom">
+                    <a href="{% url 'reservations:edit_user' user.id %}" class="btn btn-custom btn-edit-custom">
                         <i class="fas fa-edit"></i> Edit
                     </a>
-                    <a href="#" class="btn btn-custom btn-delete-custom">
+                    <a href="{% url 'reservations:delete_user' user.id %}" class="btn btn-custom btn-delete-custom">
                         <i class="fas fa-trash"></i> Delete
                     </a>
                 </div>

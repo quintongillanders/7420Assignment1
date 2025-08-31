@@ -317,3 +317,30 @@ def user_list(request):
     users = User.objects.all()
     return render(request, 'reservations/user_list.html', {'users': users})
 
+@staff_member_required
+def edit_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        user.username = request.POST.get('username')
+        user.email = request.POST.get('email')
+        user.is_staff = 'is_staff' in request.POST
+        user.is_active = 'is_active' in request.POST
+        user.save()
+        messages.success(request, 'User updated successfully!')
+        return redirect('reservations:user_list')
+    return render(request, 'reservations/edit_user.html', {'user': user})
+
+
+@staff_member_required
+def delete_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if user == request.user:
+        messages.error(request, "What are you doing? You can't delete yourself!")
+        return redirect('reservations:user_list')
+
+    if request.method == "POST":
+        user.delete()
+        messages.success(request, 'User deleted successfully!')
+        return redirect('reservations:user_list')
+    return render(request, 'reservations/confirm_delete_user.html', {'user': user})
+

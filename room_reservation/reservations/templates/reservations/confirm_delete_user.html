@@ -1,0 +1,49 @@
+{% extends "reservations/base.html" %}
+{% block title %}Confirm Delete User{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card"
+         style="max-width: 600px; margin: 50px auto;
+         border-radius: 8px;
+         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+        <div class="card-body" style="padding: 20px;">
+            <p>Are you sure you want to delete the user <strong>{{ user.username }}</strong>?</p>
+            <p class="text-muted">This cannot be undone.</p>
+
+            <form method="post" class="mt-4">
+                {% csrf_token %}
+                <div class="d-flex" style ="gap: 10px;">
+
+                    <a href="{%  url 'reservations:user_list' %}"
+                       style="flex: 1;
+                       min-width: 120px;
+                       background-color: #0738f1;
+                       border: none;
+                       border-radius: 6px;
+                       padding: 10px 20px;
+                       font-weight: 500;
+                       color: #fff;
+                       text-decoration: none;
+                       text-align: center;">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                           style="flex: 1;
+                           min-width: 120px;
+                           background-color: #f30606;
+                       border: none;
+                       border-radius: 6px;
+                       padding: 10px 20px;
+                       font-weight: 500;
+                       color: #fff;
+                       text-decoration: none;
+                       text-align: center;">
+                        Delete
+                    </button>
+                </div>
+            </form>
+    </div>
+</div>
+</div>
+    {% endblock %}
