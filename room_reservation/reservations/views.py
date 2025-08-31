@@ -344,3 +344,15 @@ def delete_user(request, user_id):
         return redirect('reservations:user_list')
     return render(request, 'reservations/confirm_delete_user.html', {'user': user})
 
+@staff_member_required
+def add_user(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'User created successfully!')
+            return redirect('reservations:user_list')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'reservations/add_user.html', {'form': form})
+
