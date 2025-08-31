@@ -127,20 +127,17 @@ class ConferenceRoomForm(forms.ModelForm):
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ("username", "password1", "password2")
+        fields = ("username", "email","password1", "password2")
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Custom help text
-        self.fields['username'].help_text = 'Your username can only be a max of 150 characters. Letters, digits and @/./+/-/_ only.'
-        self.fields['password1'].help_text = (
-            'Your password must be at least 8 characters and cannot be numbers only (e.g. 12345678)'
-        )
-        self.fields['password2'].help_text = 'Please enter the same password as above.'
+        # Remove default help text
+        for fieldname in self.fields:
+            self.fields[fieldname].help_text = None
         
       # Add bootstrap form control styling
-        for fieldname in ['username', 'password1', 'password2']:
+        for fieldname in ['username', 'email', 'password1', 'password2']:
             self.fields[fieldname].widget.attrs.update({'class': 'form-control'})
 
 # Custom login form
