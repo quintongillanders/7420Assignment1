@@ -129,11 +129,12 @@ LOGOUT_REDIRECT_URL = '/login'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For development only
 # For production, use these settings instead:
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.your-email-provider.com'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@example.com'
+EMAIL_HOST_USER = 'your-email@gmail.com'
 EMAIL_HOST_PASSWORD = 'your-email-password'
+DEFAULT_FROM_EMAIL = 'your-email@gmail.com'
 
 # Use console backend for development to see the reset link in the console
 # The email will be printed to the console instead of being sent
@@ -142,3 +143,11 @@ EMAIL_HOST_PASSWORD = 'your-email-password'
 # Make sure these point to your actual password reset URLs
 PASSWORD_RESET_CONFIRM = 'password_reset_confirm'
 PASSWORD_RESET_COMPLETE = 'password_reset_complete'
+
+# Celery Beat Settings
+CELERY_BEAT_SCHEDULE = {
+    'send reminder emails': {
+        'task': 'reservations.tasks.send_reminder_emails',
+        'schedule': 300.0,
+    },
+}
