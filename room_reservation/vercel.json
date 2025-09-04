@@ -1,0 +1,8 @@
+{
+  "builds": [
+    { "src": "room_reservation/wsgi.py", "use": "@vercel/python"}
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "room_reservation/wgsi.py" }
+    ]
+}
