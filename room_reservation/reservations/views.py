@@ -20,7 +20,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 @staff_member_required
 def view_all_reservations(request):
-    """View all reservations (staff only)"""
     reservations = Reservation.objects.all().order_by('-date', 'start_time')
     return render(request, 'reservations/admin_reservations.html', {
         'reservations': reservations
