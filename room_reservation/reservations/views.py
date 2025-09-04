@@ -11,8 +11,12 @@ from datetime import datetime, time
 from .forms import CustomUserCreationForm, ConferenceRoomForm, ReservationForm
 from .models import ConferenceRoom, Reservation
 from .forms import AdminReservationForm
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
 from django.contrib.auth.models import User
-
+from django.shortcuts import render, redirect, get_object_or_404
 
 @staff_member_required
 def view_all_reservations(request):
@@ -92,18 +96,19 @@ def room_list(request):
 
 
 # Make a reservation
+# Make a reservation
 @login_required
 def make_reservation(request):
     # Get room_id and date if exists
     room_id = request.GET.get('room')
     date_str = request.GET.get('date')
-    
+
     if request.method == 'POST':
         form = ReservationForm(request.POST)
         if form.is_valid():
             reservation = form.save(commit=False)
             reservation.user = request.user
-            
+
             # Check for overlapping reservations
             overlapping = Reservation.objects.filter(
                 room=reservation.room,
@@ -111,12 +116,44 @@ def make_reservation(request):
                 start_time__lt=reservation.end_time,
                 end_time__gt=reservation.start_time
             ).exists()
-            
+
             if overlapping:
-                messages.error(request, 'The time slot for this room has been taken, please select a different time or room.')
+                messages.error(request,
+                               'The time slot for this room has been taken, please select a different time or room.')
             else:
                 reservation.save()
-                messages.success(request, 'Reservation created successfully!')
+
+                subject = f'Room Reservation Confirmation - {reservation.room.name}'
+
+                message = f"""
+                Hello {request.user.username},
+
+                Your reservation has been confirmed:
+
+                Room: {reservation.room.name}
+                Date: {reservation.date.strftime('%d-%m-%Y')}
+                Time: {reservation.start_time.strftime('%I:%M %p').lstrip('0')} - {reservation.end_time.strftime('%I:%M %p').lstrip('0')}
+
+                Thank you!
+                """
+
+                try:
+                    send_mail(
+                        subject=subject,
+                        message=message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[reservation.user.email],
+                        fail_silently=False,
+                    )
+                    messages.success(request,
+                                     'Reservation created successfully! A confirmation email has been sent to you.')
+                except Exception as e:
+                    # log error but do not fail reservation
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"failed to send confirmation email: {str(e)}")
+                    messages.success(request, 'Reservation created successfully! (Email notification failed to send)')
+
                 return redirect('reservations:my_reservations')
     else:
 
@@ -126,15 +163,15 @@ def make_reservation(request):
                 initial_data['room'] = ConferenceRoom.objects.get(id=room_id)
             except ConferenceRoom.DoesNotExist:
                 pass
-                
+
         if date_str:
             try:
                 initial_data['date'] = datetime.strptime(date_str, '%Y-%m-%d').date()
             except (ValueError, TypeError):
                 pass
-                
+
         form = ReservationForm(initial=initial_data)
-    
+
     return render(request, 'reservations/make_reservation.html', {'form': form})
 
 
