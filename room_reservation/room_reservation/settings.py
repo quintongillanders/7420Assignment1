@@ -76,6 +76,7 @@ WSGI_APPLICATION = 'room_reservation.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 if os.environ.get('DJANGO_DEBUG', 'True') == 'True':
+    # Local development with SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -84,6 +85,7 @@ if os.environ.get('DJANGO_DEBUG', 'True') == 'True':
     }
 else:
     DATABASES = {
+        # Production using supabase PostgreSQL
         'default': dj_database_url.config(
             default="postgresql://postgres:[room_reservationdatabase]@db.eszbpclovgyewolcwmgn.supabase.co:5432/postgres"
         )
