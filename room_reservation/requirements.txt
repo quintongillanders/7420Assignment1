@@ -4,3 +4,4 @@ celery>=5.3.0
 pytz
 sqlparse
 psycopg2-binary
+dj-database-url
