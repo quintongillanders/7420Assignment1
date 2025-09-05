@@ -85,7 +85,7 @@ if os.environ.get('DJANGO_DEBUG', 'True') == 'True':
 else:
     DATABASES = {
         'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
+            default="postgresql://postgres:[room_reservationdatabase]@db.eszbpclovgyewolcwmgn.supabase.co:5432/postgres"
         )
     }
 
