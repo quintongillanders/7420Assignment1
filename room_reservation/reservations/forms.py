@@ -125,6 +125,15 @@ class ConferenceRoomForm(forms.ModelForm):
 
 # Custom user creation form for creating accounts
 class CustomUserCreationForm(UserCreationForm):
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your email address',
+        }),
+        label="Email Address"
+    )
+
     class Meta:
         model = User
         fields = ("username", "email","password1", "password2")

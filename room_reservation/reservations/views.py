@@ -122,9 +122,10 @@ def make_reservation(request):
             else:
                 reservation.save()
 
-                subject = f'Room Reservation Confirmation - {reservation.room.name}'
-
-                message = f"""
+                user_email = reservation.user.email
+                if user_email:
+                    subject = f'Room Reservation Confirmation - {reservation.room.name}'
+                    message = f"""
                 Hello {request.user.username},
 
                 Your reservation has been confirmed:
@@ -141,7 +142,7 @@ def make_reservation(request):
                         subject=subject,
                         message=message,
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[reservation.user.email],
+                        recipient_list=[user_email],
                         fail_silently=False,
                     )
                     messages.success(request,
