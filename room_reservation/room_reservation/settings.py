@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
-import dj_database_url
 DEBUG = os.environ.get('DJANGO_DEBUG', True) == 'True'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -76,20 +75,12 @@ WSGI_APPLICATION = 'room_reservation.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 if os.environ.get('DJANGO_DEBUG', 'True') == 'True':
-    # Local development with SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-else:
-    DATABASES = {
-        # Production using supabase PostgreSQL
-        'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
-
-    }
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
