@@ -1,3 +1,5 @@
 django
 gunicorn
 celery>=5.3.0
+pytz
+sqlparse

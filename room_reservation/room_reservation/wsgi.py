@@ -19,4 +19,7 @@ try:
 except Exception as e:
     logging.error(f"WSGI application failed to load: {e}")
     sys.stderr.write(f"WSGI application failed to load: {e}\n")
+
     raise
+
+app=application
