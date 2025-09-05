@@ -3,3 +3,5 @@ gunicorn
 celery>=5.3.0
 pytz
 sqlparse
+python-decouple==3.8
+dj-database-url==1.2.0
