@@ -1,30 +1,47 @@
-from django.core.mail import send_mail
 from django.utils import timezone
 from .models import Reservation
-from datetime import timedelta
+from datetime import datetime, timedelta
+from celery import shared_task
+from django.core.mail import send_mail
 
+
+@shared_task
 def send_reminder_emails():
-    # Get reservations starting in 1 hour from now
-    one_hour_from_now = timezone.now() + timedelta(hours=1)
-    upcoming_reservations = Reservation.objects.filter(
-        start_time__lte=one_hour_from_now,
-        reminder_sent=False
-    )
+   now = timezone.now()
+   one_hour_from_now = now + timedelta(hours=1)
 
-    for reservation in upcoming_reservations:
-        subject = f'Upcoming Room Reservation for {reservation.room.name}'
-        message = f'''
-        Reminder: Your room reservation starts in 1 hour.
-        Room: {reservation.room.name}
-        Date: {reservation.date}
-        Time: {reservation.start_time} - {reservation.end_time}
-        '''
-        send_mail(
-            subject,
-            message,
-            'noreply@yourdomain.com',
-            [reservation.user.email],
-            fail_silently=False,
-        )
-        reservation.reminder_sent = True
-        reservation.save()
+   # Fetch all reservations that haven't had reminders sent
+   reservations = Reservation.objects.filter(reminder_sent=False)
+
+   for reservation in reservations:
+       # combine the date and time to get the exact datetime of the reservation
+       reservation_start = datetime.combine(reservation.date, reservation.start_time)
+
+       # check if the reservation is within the next hour
+       if now <= reservation_start <= one_hour_from_now:
+           user_email = reservation.user.email
+           if user_email:
+               subject = f'Reminder: Your reservation for {reservation.room.name}'
+               message = f"""Reminder: Your reservation for {reservation.room.name} starts in one hour.
+               
+               Room: {reservation.room.name}
+               Date: {reservation.date.strftime('%d-%m-%Y')}
+               Time: {reservation.start_time.strftime('%I:%M %p').lstrip('0')} - {reservation.end_time.strftime('%I:%M %p').lstrip('0')}
+               
+               Thank you!
+               """
+               try:
+                   send_mail(
+                       subject,
+                       message,
+                       'quingillanders@gmail.com',
+                       [user_email],
+                       fail_silently=False,
+                   )
+                   # Mark the reminder as set
+                   reservation.reminder_sent = True
+                   reservation.save()
+               except Exception as e:
+                   import logging
+                   logger = logging.getLogger(__name__)
+                   logger.error(f"Failed to send reminder email: {str(e)}")
