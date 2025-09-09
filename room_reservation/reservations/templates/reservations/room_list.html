@@ -68,24 +68,6 @@
 <div class="container">
     <h1>Available Rooms</h1>
 
-{% if user.is_staff %}
-    <div class ="d-flex gap-2 mb-3 flex-wrap">
-    <a href="{% url 'reservations:admin_make_reservation' %}"
-       class="btn-custom btn-primary-custom">
-        <i class="fas fa-user-plus"></i>Reserve for a User
-    </a>
-    <a href="{% url 'reservations:admin_reservations' %}"
-       class="btn-custom btn-primary-custom">
-        <i class="fas fa-calendar-alt"></i> All Reservations
-    </a>
-    <a href="{% url 'reservations:user_list' %}"
-       class="btn-custom btn-primary-custom">
-        <i class="fas fa-calendar-alt"></i> Manage Users
-    </a>
-
-    </div>
-{% endif %}
-    
     <!-- Date Picker Form -->
     <form method="get" class="mb-4">
         <div class="row">
