@@ -42,8 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_celery_beat',
-    'django_celery_results',
     'reservations',
 ]
 
@@ -157,17 +155,3 @@ DEFAULT_FROM_EMAIL = 'quingillanders@gmail.com'
 PASSWORD_RESET_CONFIRM = 'password_reset_confirm'
 PASSWORD_RESET_COMPLETE = 'password_reset_complete'
 
-# Email reminder notification
-CELERY_BROKER_URL = 'django://'
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
-
-# Celery beat schedule
-CELERY_BEAT_SCHEDULE = {
-    'send-reminder-emails': {
-        'task': 'reservations.tasks.send_reminder_emails',
-        'schedule': 300.0,
-    }
-}
