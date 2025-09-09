@@ -136,7 +136,9 @@
     <a href="{% url 'reservations:room_list' %}">Rooms</a>
     <a href="{% url 'reservations:my_reservations' %}">My Reservations</a>
     <a href="{% url 'reservations:make_reservation' %}">Make Reservation</a>
+{%  if user.is_staff %}
     <a href="{% url 'reservations:add_room' %}">Add Room</a>
+{% endif %}
 
     {% if user.is_authenticated %}
     <form method="post" action="{% url 'logout' %}">
