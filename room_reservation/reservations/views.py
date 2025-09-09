@@ -323,7 +323,7 @@ def admin_make_reservation(request):
                 message = f"""
                 Hello {reservation.user.username},
 
-                Our staff has created a reservation for you on your behalf:
+                Our staff have created a reservation for you on your behalf:
                 
                 Room: {reservation.room.name}
                 Date: {reservation.date.strftime('%d-%m-%Y')}

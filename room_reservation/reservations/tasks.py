@@ -3,10 +3,13 @@ from .models import Reservation
 from datetime import datetime, timedelta
 from celery import shared_task
 from django.core.mail import send_mail
+import logging
+logger = logging.getLogger(__name__)
 
 
 @shared_task
 def send_reminder_emails():
+   logger.info("Running send_reminder_emails task")
    now = timezone.now()
    one_hour_from_now = now + timedelta(hours=1)
 
@@ -42,6 +45,4 @@ def send_reminder_emails():
                    reservation.reminder_sent = True
                    reservation.save()
                except Exception as e:
-                   import logging
-                   logger = logging.getLogger(__name__)
                    logger.error(f"Failed to send reminder email: {str(e)}")
