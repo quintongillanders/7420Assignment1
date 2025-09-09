@@ -10,7 +10,6 @@
             {{ form.as_table }}
         </table>
         <div style="margin-top: 20px;">
-            {%  if rooms_count < 10 %}
             <button type="submit"
                     style="padding: 6px 12px;
                            background-color: #0738f1;
@@ -22,11 +21,6 @@
                            text-decoration: none;">
                 Save Room
             </button>
-            {% else  %}
-            <p style="color:red; font-weight: bold;">
-                Sorry, there are already 10 rooms, please delete one and try again.
-            </p>
-            {% endif %}
             <a href="{% url 'reservations:room_list' %}"
                style="padding: 6px 12px;
                       background-color: #0738f1;
