@@ -201,10 +201,6 @@ def add_room(request):
   if request.method == 'POST':
     form = ConferenceRoomForm(request.POST)
     if form.is_valid():
-      # Double-check room limit before saving (in case of race condition)
-      if ConferenceRoom.objects.count() >= 10:
-        messages.error(request, "Room limit reached while processing your request. Please try again.")
-        return redirect('reservations:room_list')
       form.save()
       messages.success(request, "Room added successfully!")
       return redirect('reservations:room_list')
