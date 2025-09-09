@@ -1,6 +1,3 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.views import PasswordResetView
-from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login, authenticate
@@ -12,8 +9,6 @@ from .forms import CustomUserCreationForm, ConferenceRoomForm, ReservationForm
 from .models import ConferenceRoom, Reservation
 from .forms import AdminReservationForm
 from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
@@ -24,7 +19,6 @@ def view_all_reservations(request):
     return render(request, 'reservations/admin_reservations.html', {
         'reservations': reservations
     })
-
 
 # Login page
 def login_view(request):
@@ -251,7 +245,7 @@ def edit_reservation(request, reservation_id):
                 start_time__lt=updated_reservation.end_time,
                 end_time__gt=updated_reservation.start_time
             ).exclude(id=reservation_id).exists()
-            
+
             if overlapping:
                 messages.error(request, 'This room is already booked for the selected time slot. Please choose a different time or room.')
             else:
