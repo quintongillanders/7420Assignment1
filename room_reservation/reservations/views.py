@@ -313,13 +313,48 @@ def admin_make_reservation(request):
     if request.method == 'POST':
         form = AdminReservationForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Reservation created successfully!')
+            reservation = form.save()
+
+
+            # send user a confirmation email on behalf of an admin.
+            user_email = reservation.user.email
+            if user_email:
+                subject = f'Room Reservation confirmation on behalf of our staff - {reservation.room.name}'
+                message = f"""
+                Hello {reservation.user.username},
+
+                Our staff has created a reservation for you on your behalf:
+                
+                Room: {reservation.room.name}
+                Date: {reservation.date.strftime('%d-%m-%Y')}
+                Time: {reservation.start_time.strftime('%I:%M %p').lstrip('0')} - {reservation.end_time.strftime('%I:%M %p').lstrip('0')}
+                
+                Thank you!
+                """
+
+                try:
+                    send_mail(
+                        subject=subject,
+                        message=message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[user_email],
+                        fail_silently=False,
+                    )
+                    messages.success(request, 'Reservation created successfully! A confirmation email has been sent to the user')
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"failed to send confirmation email (admin reservation): {str(e)}")
+                    messages.success(request, 'Reservation created successfully! (Email notification failed to send)')
+            else:
+                messages.success(request, 'Reservation created successfully, but this user does not have an email on their account')
+
             return redirect('reservations:room_list')
     else:
         form = AdminReservationForm()
 
     return render(request, 'reservations/admin_make_reservation.html', {'form': form})
+
 
 # Oversee all reservations and cancel reservations, meant for staff only
 @staff_member_required
