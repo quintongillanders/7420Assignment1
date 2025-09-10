@@ -129,6 +129,7 @@ def make_reservation(request):
                 Time: {reservation.start_time.strftime('%I:%M %p').lstrip('0')} - {reservation.end_time.strftime('%I:%M %p').lstrip('0')}
 
                 Thank you!
+                Te Whare Runaga Conference Room Booking System
                 """
 
                 try:
@@ -250,6 +251,36 @@ def edit_reservation(request, reservation_id):
                 messages.error(request, 'This room is already booked for the selected time slot. Please choose a different time or room.')
             else:
                 updated_reservation.save()
+
+                # Send the user an email after updating reservation
+                user_email = updated_reservation.user.email
+                if user_email:
+                    subject = f'Room Reservation Updated - {updated_reservation.room.name}'
+                    message = f"""
+                Hello {updated_reservation.user.username},
+                
+                Your reservation for {updated_reservation.room.name} has been updated.
+                
+                Room: {updated_reservation.room.name}
+                Date: {updated_reservation.date.strftime('%Y-%m-%d')}
+                Time: {updated_reservation.start_time.strftime('%I:%M %p')}-{updated_reservation.end_time.strftime('%I:%M %p')}
+                
+                Thank you!
+                Te Whare Runaga Conference Room Booking System
+                """
+                    try:
+                        send_mail(
+                            subject=subject,
+                            message=message,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[user_email],
+                            fail_silently=False,
+                        )
+                    except Exception as e:
+                        import logging
+                        logger = logging.getLogger(__name__)
+                        logger.error(f'Failed to send reservation update email: {str(e)}')
+
                 messages.success(request, 'Reservation updated successfully!')
                 return redirect('reservations:my_reservations')
     else:
@@ -324,6 +355,7 @@ def admin_make_reservation(request):
                 Time: {reservation.start_time.strftime('%I:%M %p').lstrip('0')} - {reservation.end_time.strftime('%I:%M %p').lstrip('0')}
                 
                 Thank you!
+                Te Whare Runaga Conference Room Booking System staff
                 """
 
                 try:
