@@ -434,9 +434,35 @@ def admin_cancel_reservation(request, reservation_id):
         username = reservation.user.username
 
         reservation.delete()
-        messages.success(request, 'Reservation canceled successfully!')
+        messages.success(request, 'Reservation canceled successfully! A confirmation email has been sent to the user.')
 
-        # Send the user an email notifying them 
+        # Send the user an email notifying them of the staff cancellation
+        if user_email:
+            subject = f'Room Reservation Canceled - {room_name}'
+            message = f"""
+        Hello {username},
+        As per your request, our staff have canceled your reservation for {room_name}:
+        
+        Room: {room_name}
+        Date: {reservation_date.strftime('%d-%m-%Y')}
+        Time: {start_time.strftime('%I:%M %p').lstrip('0')} - {end_time.strftime('%I:%M %p').lstrip('0')}
+        
+        Thank you!
+        Te Whare Runaga Conference Room Booking System staff
+        """
+            try:
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user_email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"failed to send cancellation email (admin reservation): {str(e)}")
+
     return redirect('reservations:admin_reservations')
 
 @staff_member_required
