@@ -396,8 +396,41 @@ def delete_room(request, room_id):
 
     if request.method == 'POST':
         # get all reservations in current room before deletion
+        reservations = Reservation.objects.filter(room=room)
+        for res in reservations:
+            user_email = res.user.email
+            if user_email:
+                subject = f'Room Reservation Canceled - {room.name}'
+                message = f"""
+            Hello {res.user.username},
+            
+            Unfortunately, the room you have a reservation for has been deleted by our staff.
+            As a result of this, your reservation has been canceled.
+            
+            Date: {res.date.strftime('%d-%m-%Y')}
+            Time: {res.start_time.strftime('%I:%M %p')}-{res.end_time.strftime('%I:%M %p')}
+            
+            Please choose another one of our rooms that may suit your needs.
+            Thank you!
+            Te Whare Runaga Conference Room Booking System staff
+            """
+                try:
+                    send_mail(
+                        subject=subject,
+                        message=message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[user_email],
+                        fail_silently=False,
+                    )
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"failed to send cancellation email: {str(e)}")
+
+        # delete all reservations for this room
+        reservations.delete()
         room.delete()
-        messages.success(request, 'Room deleted successfully!')
+        messages.success(request, 'Room deleted successfully! Any users with existing reservations have been emailed.')
         return redirect('reservations:room_list')
 
     messages.info(request, f'Room "{room.name}" deletion cancelled')
