@@ -339,11 +339,46 @@ def cancel_reservation(request, reservation_id):
 @staff_member_required
 def edit_room(request, room_id):
     room = get_object_or_404(ConferenceRoom, id=room_id)
+    old_room_name = room.name
 
     if request.method == 'POST':
         form = ConferenceRoomForm(request.POST, instance=room)
         if form.is_valid():
-            form.save()
+            updated_room = form.save()
+            updated_room.save()
+
+            # if the room name has changed recently, send an email notification to users with reservations:
+            if old_room_name != updated_room.name:
+                reservations = Reservation.objects.filter(room=room)
+                for res in reservations:
+                    user_email = res.user.email
+                    if user_email:
+                        subject = f'Room Name Changed - {updated_room.name}'
+                        message = f"""
+                    Hello {res.user.username},
+                    
+                    Please note that the room you have a reservation for has been updated:
+                    
+                    Old Room Name: {old_room_name}
+                    New Room Name: {updated_room.name}
+                    Date: {res.date.strftime('%d-%m-%Y')}
+                    Time: {res.start_time.strftime('%I:%M %p')}-{res.end_time.strftime('%I:%M %p')}
+                    
+                    Thank you!
+                    Te Whare Runaga Conference Room Booking System staff
+                    """
+                        try:
+                            send_mail(
+                                subject=subject,
+                                message=message,
+                                from_email=settings.DEFAULT_FROM_EMAIL,
+                                recipient_list=[user_email],
+                                fail_silently=False,
+                            )
+                        except Exception as e:
+                            import logging
+                            logger = logging.getLogger(__name__)
+                            logger.error(f'Failed to send room name change email: {str(e)}')
             messages.success(request, 'Room updated successfully!')
             return redirect('reservations:room_list')
 
@@ -360,6 +395,7 @@ def delete_room(request, room_id):
     room = get_object_or_404(ConferenceRoom, id=room_id)
 
     if request.method == 'POST':
+        # get all reservations in current room before deletion
         room.delete()
         messages.success(request, 'Room deleted successfully!')
         return redirect('reservations:room_list')
