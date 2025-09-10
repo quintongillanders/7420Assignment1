@@ -296,8 +296,42 @@ def edit_reservation(request, reservation_id):
 def cancel_reservation(request, reservation_id):
     reservation = get_object_or_404(Reservation, id=reservation_id, user=request.user)
     if request.method == 'POST':
+        user_email = reservation.user.email
+        room_name = reservation.room.name
+        reservation_date = reservation.date
+        start_time = reservation.start_time
+        end_time = reservation.end_time
         reservation.delete()
         messages.success(request, 'Reservation canceled successfully!')
+
+        # Once the user has canceled their reservation:
+        if user_email:
+            subject = f'Room Reservation Canceled - {reservation.room.name}'
+            message = f"""
+        Hello {request.user.username},
+        
+        Your reservation for room {room_name} has been canceled.
+        
+        Room: {room_name}
+        Date: {reservation_date.strftime('%d-%m-%Y')}
+        Time: {start_time.strftime('%I:%M %p').lstrip('0')} - {end_time.strftime('%I:%M %p').lstrip('0')}
+        
+        Thank you!
+        Te Whare Runaga Conference Room Booking System
+        """
+            try:
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user_email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"failed to send cancellation email: {str(e)}")
+
     return redirect('reservations:my_reservations')
 
 
@@ -392,8 +426,17 @@ def view_all_reservations(request):
 def admin_cancel_reservation(request, reservation_id):
     reservation = get_object_or_404(Reservation, id=reservation_id)
     if request.method == 'POST':
+        user_email = reservation.user.email
+        room_name = reservation.room.name
+        reservation_date = reservation.date
+        start_time = reservation.start_time
+        end_time = reservation.end_time
+        username = reservation.user.username
+
         reservation.delete()
         messages.success(request, 'Reservation canceled successfully!')
+
+        # Send the user an email notifying them 
     return redirect('reservations:admin_reservations')
 
 @staff_member_required
