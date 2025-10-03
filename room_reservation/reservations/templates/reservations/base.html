@@ -14,7 +14,8 @@
     }
        nav {
            background-color: #e10707;
-           padding: 15px;
+           padding: 15px 0;
+           height: 50px;
            display: flex;
            justify-content: center;
            align-items: center;
@@ -77,6 +78,7 @@
          background-color: #e10707;
          color: white;
          padding: 10px;
+         height: 50px;
          font_size: 0.9rem;
          position: fixed;
          bottom: 0;
@@ -133,9 +135,7 @@
 </head>
 <body>
 <nav>
-    <a href="{% url 'reservations:room_list' %}">Rooms</a>
-    <a href="{% url 'reservations:my_reservations' %}">My Reservations</a>
-    <a href="{% url 'reservations:make_reservation' %}">Make Reservation</a>
+
 {%  if user.is_staff %}
     <a href="{% url 'reservations:add_room' %}">Add Room</a>
     <a href="{% url 'reservations:admin_make_reservation' %}">Reserve for User</a>
@@ -144,12 +144,17 @@
 {% endif %}
 
     {% if user.is_authenticated %}
-    <form method="post" action="{% url 'logout' %}">
+        <a href="{% url 'reservations:room_list' %}">Rooms</a>
+        <a href="{% url 'reservations:my_reservations' %}">My Reservations</a>
+        <a href="{% url 'reservations:make_reservation' %}">Make Reservation</a>
+        <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}
-        <button type="submit">Logout</button>
+            <button type="submit">Logout</button>
     </form>
     <span>Welcome, {{ user.username }}!!</span>
     {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'reservations:register' %}">Register</a>
     {% endif %}
 </nav>
 
