@@ -55,13 +55,13 @@ def room_list(request):
             selected_date = timezone.now().date()
     else:
         selected_date = timezone.now().date()
-    
+
     # get the current time for availability
     current_time = timezone.now().time()
-    
+
     # get all rooms
     rooms = ConferenceRoom.objects.all()
-    
+
     # find all reservations for that specific date
     reservations = Reservation.objects.filter(date=selected_date)
 
@@ -69,7 +69,7 @@ def room_list(request):
     for room in rooms:
         room_reservations = reservations.filter(room=room).order_by('start_time')
         room.is_available = not room_reservations.exists()
-        
+
         # store the time slots of rooms
         room.booking_times = []
         for res in room_reservations:
@@ -77,7 +77,7 @@ def room_list(request):
                 'start': res.start_time.strftime('%I:%M %p').lstrip('0'),
                 'end': res.end_time.strftime('%I:%M %p').lstrip('0')
             })
-    
+
     context = {
         'rooms': rooms,
         'selected_date': selected_date,
@@ -174,7 +174,7 @@ def make_reservation(request):
 @login_required
 def my_reservations(request):
     now = timezone.now()  # get the current date and time
-    
+
     # Filter reservations for the current user that are in the future only
     reservations = Reservation.objects.filter(
         user=request.user,
@@ -238,7 +238,7 @@ def edit_reservation(request, reservation_id):
         form = ReservationForm(request.POST, instance=reservation)
         if form.is_valid():
             updated_reservation = form.save(commit=False)
-            
+
             # Exclude current reservation from overlapping checks
             overlapping = Reservation.objects.filter(
                 room=updated_reservation.room,
@@ -577,4 +577,9 @@ def add_user(request):
     else:
         form = CustomUserCreationForm()
     return render(request, 'reservations/add_user.html', {'form': form})
+
+@staff_member_required
+def admin_panel(request):
+    return render(request, 'reservations/admin_panel.html')
+
 

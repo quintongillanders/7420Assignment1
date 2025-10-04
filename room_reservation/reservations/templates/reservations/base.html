@@ -137,10 +137,7 @@
 <nav>
 
 {%  if user.is_staff %}
-    <a href="{% url 'reservations:add_room' %}">Add Room</a>
-    <a href="{% url 'reservations:admin_make_reservation' %}">Reserve for User</a>
-    <a href="{% url 'reservations:user_list' %}">Manage Users</a>
-    <a href="{% url 'reservations:admin_reservations' %}">All Reservations</a>
+    <a href="{% url 'reservations:admin_panel' %}">Admin Panel</a>
 {% endif %}
 
     {% if user.is_authenticated %}

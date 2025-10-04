@@ -1,0 +1,61 @@
+{% extends "reservations/base.html" %}
+{%  block content %}
+<h1>Admin Panel</h1>
+<p>Welcome, {{ user.username }}! Please select an option to manage the site.</p>
+
+<div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 20px;">
+     <form action="{% url 'reservations:add_room' %}">
+         <button type="submit"
+                 style ="
+                 padding: 10px 20px;
+                 font-size: 1rem;
+                 background-color: #0738f1;
+                 color: white;
+                 border: none;
+                 border-radius: 5px;
+                 cursor: pointer;">
+             Add Room</button>
+     </form>
+
+    <form action="{% url 'reservations:admin_make_reservation' %}">
+        <button type="submit"
+                style ="
+                padding: 10px 20px;
+                font-size: 1rem;
+                background-color: #28a745;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;">
+            Reserve for User</button>
+    </form>
+
+    <form action="{% url 'reservations:admin_reservations' %}">
+        <button type="submit"
+                style ="
+                padding: 10px 20px;
+                font-size: 1rem;
+                background-color: #ef051b;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;">
+            View All Reservations</button>
+    </form>
+
+    <form action="{% url 'reservations:user_list' %}">
+        <button type="submit"
+                style ="
+                padding: 10px 20px;
+                font-size: 1rem;
+                background-color: #8705f1;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;">
+            Manage Users</button>
+    </form>
+    </div>
+{% endblock %}
+
+
